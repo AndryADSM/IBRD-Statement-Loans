@@ -37,7 +37,7 @@ Add description...
 
 ---
 
-[add link to tableau]
+[Go to Tableau](https://public.tableau.com/app/profile/andry38a/viz/ibrd_stmt_loans_tableau/Loans)
 
 ---
 
