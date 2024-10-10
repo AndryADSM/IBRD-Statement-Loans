@@ -1,6 +1,6 @@
--- ibrd_stmt_loans_mysql_queries
+-- ibrd_stmt_loans_mssql_queries
 
--- Queries for MySQL
+-- Queries for MSSQLServer
 
 -- Queries to get insights from the ibrd_stmt_loans database
 -- and check data obtained in dashboards
@@ -59,7 +59,7 @@ SELECT SUM(m.repaid_to_ibrd + t.repaid_third_party) AS total_repaid
 FROM
 	money AS m
 		JOIN
-	thirdparty AS t ON (m.end_of_period, m.loan_number) = (t.end_of_period, t.loan_number)
+	thirdparty AS t ON m.end_of_period = t.end_of_period AND m.loan_number = t.loan_number
 WHERE m.end_of_period = (SELECT MAX(end_of_period) FROM loans);
 
 -- 6. Total Due
@@ -130,7 +130,7 @@ WITH year_counts AS (
 		COUNT(loan_number) AS metric
 	FROM dates
     WHERE end_of_period = (SELECT MAX(end_of_period) FROM loans)
-	GROUP BY year_approval
+	GROUP BY year(board_approval_date)
 )
 SELECT 
 	year_approval,
@@ -154,15 +154,15 @@ SELECT
 		OVER (ORDER BY YEAR(board_approval_date)) AS running_total
 FROM dates
 WHERE end_of_period = (SELECT MAX(end_of_period) FROM loans)
-GROUP BY year_approval
-ORDER BY year_approval;
+GROUP BY YEAR(board_approval_date)
+ORDER BY YEAR(board_approval_date);
 
 -- 3. Loans by Type (Donut Chart)
 
 SELECT
 	l.loan_type,
 	COUNT(l.loan_number) AS count_loans,
-	COUNT(l.loan_number) / MAX(tl.total_loans) AS pct_of_total
+	ROUND(CAST(COUNT(l.loan_number) AS FLOAT) / MAX(tl.total_loans), 4) AS pct_of_total
 FROM
 	loans AS l,
     (SELECT COUNT(loan_number) AS total_loans 
@@ -183,7 +183,7 @@ SELECT
         ELSE 'Ongoing'
 		END AS status_group,
 	COUNT(l.loan_number) AS count_loans,
-	COUNT(l.loan_number) / MAX(tl.total_loans) AS pct_of_total
+	ROUND(CAST(COUNT(l.loan_number) AS FLOAT) / MAX(tl.total_loans), 4) AS pct_of_total
 FROM
 	loans AS l,
     (SELECT COUNT(loan_number) AS total_loans
@@ -191,7 +191,13 @@ FROM
         WHERE end_of_period = (SELECT MAX(end_of_period) FROM loans)
         ) AS tl
 WHERE l.end_of_period = (SELECT MAX(end_of_period) FROM loans)
-GROUP BY status_group
+GROUP BY
+	CASE
+        WHEN l.loan_status
+			IN ('Fully Repaid', 'Fully Cancelled', 'Fully Transferred', 'Terminated')
+        THEN 'Finished'
+        ELSE 'Ongoing'
+		END
 ORDER BY count_loans DESC;
 
 -- 4b. Loans by Status (Bar Chart)
@@ -199,7 +205,7 @@ ORDER BY count_loans DESC;
 SELECT
 	loan_status,
 	COUNT(l.loan_number) AS count_loans,
-	COUNT(l.loan_number) / MAX(tl.total_loans) AS pct_of_total
+	ROUND(CAST(COUNT(l.loan_number) AS FLOAT) / MAX(tl.total_loans), 4) AS pct_of_total
 FROM
 	loans AS l,
     (SELECT COUNT(loan_number) AS total_loans
@@ -225,7 +231,7 @@ FROM
 		JOIN
 	countries AS c ON l.country_code = c.country_code
 WHERE l.end_of_period = (SELECT MAX(end_of_period) FROM loans)
-GROUP BY c.country_code
+GROUP BY c.country_code, c.country
 ORDER BY total_loans DESC;
 
 -- 2. Distinct Countries Given Loans per Year (Area Chart)
@@ -236,9 +242,9 @@ SELECT
 FROM
 	loans AS l
 		JOIN
-	dates AS d ON (l.end_of_period, l.loan_number) = (d.end_of_period, d.loan_number)
+	dates AS d ON l.end_of_period = d.end_of_period AND l.loan_number = d.loan_number
 WHERE l.end_of_period = (SELECT MAX(end_of_period) FROM loans)
-GROUP BY year_approval
+GROUP BY YEAR(d.board_approval_date)
 ORDER BY year_approval;
 
 -- 3a. Total Repaid and Due by Region (Stacked Bar Chart)
@@ -248,17 +254,17 @@ SELECT
     SUM(m.disbursed_amount) AS total_disbursed,
 	SUM(m.repaid_to_ibrd + t.repaid_third_party) AS total_repaid,
 	SUM(m.borrowers_obligation) AS total_due,
-	ROUND(SUM(m.borrowers_obligation)
-		/ IF(SUM(m.disbursed_amount) = 0, 1, SUM(m.disbursed_amount))
-        , 4) AS pct_due
+	ROUND(CAST(SUM(m.borrowers_obligation) AS FLOAT)
+		/ CASE WHEN SUM(m.disbursed_amount) = 0 THEN 1 ELSE SUM(m.disbursed_amount) END
+		, 4) AS pct_due
 FROM
 	loans AS l
 		JOIN
 	countries AS c ON l.country_code = c.country_code
 		JOIN
-    money AS m ON (l.end_of_period, l.loan_number) = (m.end_of_period, m.loan_number)
+    money AS m ON l.end_of_period = m.end_of_period AND l.loan_number = m.loan_number
 		JOIN
-	thirdparty AS t ON (l.end_of_period, l.loan_number) = (t.end_of_period, t.loan_number)
+	thirdparty AS t ON l.end_of_period = t.end_of_period AND l.loan_number = t.loan_number
 WHERE l.end_of_period = (SELECT MAX(end_of_period) FROM loans)
 GROUP BY c.region
 ORDER BY total_disbursed DESC;
@@ -267,21 +273,21 @@ ORDER BY total_disbursed DESC;
 
 SELECT
 	c.country,
-    c.country_code,
+	c.country_code,
     SUM(m.disbursed_amount) AS total_disbursed,
 	SUM(m.repaid_to_ibrd + t.repaid_third_party) AS total_repaid,
 	SUM(m.borrowers_obligation) AS total_due,
-	ROUND(SUM(m.borrowers_obligation)
-		/ IF(SUM(m.disbursed_amount) = 0, 1, SUM(m.disbursed_amount))
-        , 4) AS pct_due
+	ROUND(CAST(SUM(m.borrowers_obligation) AS FLOAT)
+		/ CASE WHEN SUM(m.disbursed_amount) = 0 THEN 1 ELSE SUM(m.disbursed_amount) END
+		, 4) AS pct_due
 FROM
 	loans AS l
 		JOIN
 	countries AS c ON l.country_code = c.country_code
 		JOIN
-    money AS m ON (l.end_of_period, l.loan_number) = (m.end_of_period, m.loan_number)
+    money AS m ON l.end_of_period = m.end_of_period AND l.loan_number = m.loan_number
 		JOIN
-	thirdparty AS t ON (l.end_of_period, l.loan_number) = (t.end_of_period, t.loan_number)
+	thirdparty AS t ON l.end_of_period = t.end_of_period AND l.loan_number = t.loan_number
 WHERE l.end_of_period = (SELECT MAX(end_of_period) FROM loans)
 GROUP BY c.country, c.country_code
 ORDER BY total_disbursed DESC;
@@ -307,21 +313,21 @@ SELECT
 FROM
 	loans AS l
 		JOIN
-	money AS m ON (l.end_of_period, l.loan_number) = (m.end_of_period, m.loan_number)
+	money AS m ON l.end_of_period = m.end_of_period AND l.loan_number = m.loan_number
 		JOIN
-	thirdparty AS t ON (l.end_of_period, l.loan_number) = (t.end_of_period, t.loan_number)
+	thirdparty AS t ON l.end_of_period = t.end_of_period AND l.loan_number = t.loan_number
 		JOIN
-	dates AS d ON (l.end_of_period, l.loan_number) = (d.end_of_period, d.loan_number)
+	dates AS d ON l.end_of_period = d.end_of_period AND l.loan_number = d.loan_number
 		JOIN
 	projects AS p ON l.project_id = p.project_id
 WHERE
 	l.end_of_period = (SELECT MAX(end_of_period) FROM loans)
 	AND d.board_approval_date
-		BETWEEN DATE_ADD((SELECT MAX(end_of_period) FROM loans), INTERVAL -3 MONTH)
+		BETWEEN DATEADD(MONTH, -3, (SELECT MAX(end_of_period) FROM loans))
 		AND (SELECT MAX(end_of_period) FROM loans)
 ORDER BY
 	d.board_approval_date DESC,
-    l.loan_number DESC;
+	l.loan_number DESC;
 
 -- 2. Disbursements Last Months (Table)
 
@@ -335,19 +341,19 @@ SELECT
 FROM
 	loans AS l
 		JOIN
-	money AS m ON (l.end_of_period, l.loan_number) = (m.end_of_period, m.loan_number)
+	money AS m ON l.end_of_period = m.end_of_period AND l.loan_number = m.loan_number
 		JOIN
-	thirdparty AS t ON (l.end_of_period, l.loan_number) = (t.end_of_period, t.loan_number)
+	thirdparty AS t ON l.end_of_period = t.end_of_period AND l.loan_number = t.loan_number
 		JOIN
-	dates AS d ON (l.end_of_period, l.loan_number) = (d.end_of_period, d.loan_number)
+	dates AS d ON l.end_of_period = d.end_of_period AND l.loan_number = d.loan_number
 WHERE
 	l.end_of_period = (SELECT MAX(end_of_period) FROM loans)
 	AND d.last_disbursement_date
-		BETWEEN DATE_ADD((SELECT MAX(end_of_period) FROM loans), INTERVAL -1 MONTH)
+		BETWEEN DATEADD(MONTH, -1, (SELECT MAX(end_of_period) FROM loans))
 		AND (SELECT MAX(end_of_period) FROM loans)
 ORDER BY
 	d.last_disbursement_date DESC,
-    l.loan_number DESC;
+	l.loan_number DESC;
 
 -- 3. Last Repayments Next 3 Months (Table)
 
@@ -361,19 +367,19 @@ SELECT
 FROM
 	loans AS l
 		JOIN
-	money AS m ON (l.end_of_period, l.loan_number) = (m.end_of_period, m.loan_number)
+	money AS m ON l.end_of_period = m.end_of_period AND l.loan_number = m.loan_number
 		JOIN
-	thirdparty AS t ON (l.end_of_period, l.loan_number) = (t.end_of_period, t.loan_number)
+	thirdparty AS t ON l.end_of_period = t.end_of_period AND l.loan_number = t.loan_number
 		JOIN
-	dates AS d ON (l.end_of_period, l.loan_number) = (d.end_of_period, d.loan_number)
+	dates AS d ON l.end_of_period = d.end_of_period AND l.loan_number = d.loan_number
 WHERE
 	l.end_of_period = (SELECT MAX(end_of_period) FROM loans)
 	AND d.last_repayment_date 
 		BETWEEN (SELECT MAX(end_of_period) FROM loans)
-		AND DATE_ADD((SELECT MAX(end_of_period) FROM loans), INTERVAL 3 MONTH)
+		AND DATEADD(MONTH, 3, (SELECT MAX(end_of_period) FROM loans))
 ORDER BY
 	d.last_repayment_date ASC,
-    l.loan_number ASC;
+	l.loan_number ASC;
 
 -- END
 -- ---
