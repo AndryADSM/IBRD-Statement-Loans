@@ -4,6 +4,8 @@ Project in progress :)
 
 🌐 Check this project on [my website](https://aadsm2355.wixsite.com/andryadsm/ibrd-stmt-loans)!
 
+View the [Tableau Dashboard](https://public.tableau.com/app/profile/andry38a/viz/ibrd_stmt_loans_tableau/Loans).
+
 ## Files
 - A
 - B
@@ -37,11 +39,7 @@ Add description...
 
 ---
 
-[Go to Tableau](https://public.tableau.com/app/profile/andry38a/viz/ibrd_stmt_loans_tableau/Loans)
-
----
-
-![powerbi_1L](https://github.com/user-attachments/assets/1d0a708b-7df7-4e05-a6e3-9ca058756886)
-![powerbi_2L](https://github.com/user-attachments/assets/e49a8550-596d-4819-8b1e-8cd35da4383d)
+![Loans](https://github.com/user-attachments/assets/0a18bc3c-93be-46d3-bc28-ab260c5dde21)
+![Countries](https://github.com/user-attachments/assets/a9392c28-cb9e-4fdf-81b4-cbd8d48e8b4d)
 
 ---
