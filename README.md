@@ -1,15 +1,14 @@
-# IBRD Statement of Loans
-
-Project in progress :)
+# Statement of Loans of The International Bank for Reconstruction and Development
 
 🌐 Check this project on [my website](https://aadsm2355.wixsite.com/andryadsm/ibrd-stmt-loans)!
 
-View the [Tableau Dashboard](https://public.tableau.com/app/profile/andry38a/viz/ibrd_stmt_loans_tableau/Loans).
+📊 View the dashboard in [Tableau Public](https://public.tableau.com/app/profile/andry38a/viz/ibrd_stmt_loans_tableau/Loans).
 
 ## Files
 - 'IBRD Statement of Loans.twbx' is the Tableau workbook.
 - 'db_diagram.png' is a photo of the database diagram.
 - 'ibrd_stmt_loans_excel.zip' contains the Excel workbook as an .xlsx file.
+- 'ibrd_stmt_loans_excel_pdf.pdf' is the Excel workbook as a .pdf file, not interactive and slightly worsened due to conversion.
 - 'ibrd_stmt_loans_get_transform_data.ipynb' is the Jupyter Notebook with all the Python code.
 - 'ibrd_stmt_loans_mssql_db.sql' has all the queries for the creation of the entire relational database in MSSQLServer.
 - 'ibrd_stmt_loans_mssql_queries.sql' has organized all the queries for data retrieval and checking in MSSQLServer.
@@ -56,5 +55,6 @@ Banking, International Development
 
 ![Loans](https://github.com/user-attachments/assets/0a18bc3c-93be-46d3-bc28-ab260c5dde21)
 ![Countries](https://github.com/user-attachments/assets/a9392c28-cb9e-4fdf-81b4-cbd8d48e8b4d)
+![db_diagram](https://github.com/user-attachments/assets/83a83929-82a3-49b7-8bbe-a3b4358832cb)
 
 ---
