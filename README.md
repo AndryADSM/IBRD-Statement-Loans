@@ -6,10 +6,10 @@
 
 ## Files
 - 'IBRD Statement of Loans.twbx' is the Tableau workbook.
-- 'db_diagram.png' is a photo of the database diagram.
+- 'db_diagram.png' is an image of the database diagram.
+- 'ibrd_stmt_loans_etl.ipynb' is the Jupyter Notebook with all the Python code.
 - 'ibrd_stmt_loans_excel.zip' contains the Excel workbook as an .xlsx file.
 - 'ibrd_stmt_loans_excel_pdf.pdf' is the Excel workbook as a .pdf file, not interactive and slightly worsened due to conversion.
-- 'ibrd_stmt_loans_get_transform_data.ipynb' is the Jupyter Notebook with all the Python code.
 - 'ibrd_stmt_loans_mssql_db.sql' has all the queries for the creation of the entire relational database in MSSQLServer.
 - 'ibrd_stmt_loans_mssql_queries.sql' has organized all the queries for data retrieval and checking in MSSQLServer.
 - 'ibrd_stmt_loans_mysql_db.sql' has all the queries for the creation of the entire relational database in MySQL.
