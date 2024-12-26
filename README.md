@@ -4,6 +4,8 @@
 
 📊 View the dashboard in [Tableau Public](https://public.tableau.com/app/profile/andry38a/viz/ibrd_stmt_loans_tableau/Loans).
 
+📽️ Watch the [YouTube Video Showcase](https://youtu.be/Ba68ughffFQ)
+
 ## Files
 - 'IBRD Statement of Loans.twbx' is the Tableau workbook.
 - 'db_diagram.png' is an image of the database diagram.
